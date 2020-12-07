@@ -1,6 +1,7 @@
 package mindustry.game;
 
 import arc.util.*;
+import arc.struct.*;
 import arc.util.serialization.*;
 import arc.util.serialization.Json.*;
 import mindustry.content.*;
@@ -23,6 +24,8 @@ public class SpawnGroup implements Serializable{
 
     /** The unit type spawned */
     public UnitType type = UnitTypes.dagger;
+    /** Payload Seq, by default one dagger */
+    public @Nullable Seq<UnitType> payloads;
     /** When this spawn should end */
     public int end = never;
     /** When this spawn should start */
@@ -83,6 +86,13 @@ public class SpawnGroup implements Serializable{
             unit.addItem(items.item, items.amount);
         }
 
+        if(payloads != null && payloads.size > 0 && unit instanceof Payloadc){
+            for(UnitType unitType : payloads){
+                Unit payload = unitType.create(unit.team);
+                ((Payloadc) unit).pickup(payload);
+            }
+        }
+
         unit.shield = getShield(wave);
 
         return unit;
@@ -101,6 +111,13 @@ public class SpawnGroup implements Serializable{
         if(shieldScaling != 0) json.writeValue("shieldScaling", shieldScaling);
         if(unitAmount != 1) json.writeValue("amount", unitAmount);
         if(effect != null) json.writeValue("effect", effect.name);
+        if(payloads != null && payloads.size > 0){
+            Seq<String> payloadStrings = new Seq<String>();
+            for(UnitType unitType : payloads){
+                payloadStrings.add(unitType.name);
+            }
+            json.writeValue("payloads", payloadStrings);
+        }
     }
 
     @Override
@@ -117,6 +134,15 @@ public class SpawnGroup implements Serializable{
         shields = data.getFloat("shields", 0);
         shieldScaling = data.getFloat("shieldScaling", 0);
         unitAmount = data.getInt("amount", 1);
+        if(data.has("payloads")){
+            payloads = new Seq<UnitType>();
+            Seq<String> payloadStrings = json.readValue(Seq.class, String.class, data.get("payloads"));
+
+            for(String name : payloadStrings){
+                payloads.add(content.getByName(ContentType.unit, name));
+            }
+        }
+
 
         //old boss effect ID
         if(data.has("effect") && data.get("effect").isNumber() && data.getInt("effect", -1) == 8){
@@ -129,16 +155,16 @@ public class SpawnGroup implements Serializable{
     @Override
     public String toString(){
         return "SpawnGroup{" +
-        "type=" + type +
-        ", end=" + end +
-        ", begin=" + begin +
-        ", spacing=" + spacing +
-        ", max=" + max +
-        ", unitScaling=" + unitScaling +
-        ", unitAmount=" + unitAmount +
-        ", effect=" + effect +
-        ", items=" + items +
-        '}';
+                "type=" + type +
+                ", end=" + end +
+                ", begin=" + begin +
+                ", spacing=" + spacing +
+                ", max=" + max +
+                ", unitScaling=" + unitScaling +
+                ", unitAmount=" + unitAmount +
+                ", effect=" + effect +
+                ", items=" + items +
+                '}';
     }
 
     @Override
