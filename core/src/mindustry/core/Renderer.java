@@ -32,7 +32,7 @@ public class Renderer implements ApplicationListener{
 
     public @Nullable Bloom bloom;
     public FrameBuffer effectBuffer = new FrameBuffer();
-    public boolean animateShields, drawWeather = true, drawStatus;
+    public boolean animateShields, drawWeather = true, drawStatus, teamOutline = true;
     /** minZoom = zooming out, maxZoom = zooming in */
     public float minZoom = 1.5f, maxZoom = 6f;
 
@@ -75,8 +75,8 @@ public class Renderer implements ApplicationListener{
         laserOpacity = settings.getInt("lasersopacity") / 100f;
         bridgeOpacity = settings.getInt("bridgeopacity") / 100f;
         animateShields = settings.getBool("animatedshields");
-        drawStatus = Core.settings.getBool("blockstatus");
-
+        drawStatus = settings.getBool("blockstatus");
+        teamOutline = settings.getBool("teamoutline");
         if(landTime > 0){
             landTime -= Time.delta;
             landscale = Interp.pow5In.apply(minZoomScl, Scl.scl(4f), 1f - landTime / Fx.coreLand.lifetime);
@@ -207,7 +207,7 @@ public class Renderer implements ApplicationListener{
 
         Draw.draw(Layer.background, this::drawBackground);
         Draw.draw(Layer.floor, blocks.floor::drawFloor);
-        Draw.draw(Layer.block - 1, blocks::drawShadows);
+        Draw.draw(Layer.blockUnder - 0.5f, blocks::drawShadows);
         Draw.draw(Layer.block, () -> {
             blocks.floor.beginDraw();
             blocks.floor.drawLayer(CacheLayer.walls);
