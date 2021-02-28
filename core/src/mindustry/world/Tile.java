@@ -1,5 +1,6 @@
 package mindustry.world;
 
+import arc.*;
 import arc.func.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -12,6 +13,7 @@ import mindustry.annotations.Annotations.*;
 import mindustry.content.*;
 import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.input.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.environment.*;
@@ -589,13 +591,22 @@ public class Tile implements Position, QuadTreeObject, Displayable{
 
     @Override
     public void display(Table table){
-        Block toDisplay = overlay.itemDrop != null ? overlay : floor;
-
         table.table(t -> {
+            Block toDisplay = overlay.itemDrop != null ? overlay : floor;
+
+            if(Core.input.keyDown(Binding.pick) && state.amendments.lastBuilding.get(pos()) != null){
+                toDisplay = content.block(state.amendments.lastBuilding.get(pos()));
+            }
+
             t.left();
             t.add(new Image(toDisplay.getDisplayIcon(this))).size(8 * 4);
             t.labelWrap(toDisplay.getDisplayName(this)).left().width(190f).padLeft(5);
         }).growX().left();
+
+        if(net.active() && Core.input.keyDown(Binding.pick) && state.amendments.lastAccessed.get(pos()) != null){
+            table.row();
+            table.add(Core.bundle.format("lastaccessed", state.amendments.lastAccessed.get(pos()))).growX().wrap().left();
+        }
     }
 
     @Override

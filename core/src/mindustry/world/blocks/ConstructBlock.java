@@ -54,6 +54,7 @@ public class ConstructBlock extends Block{
         Team team = tile.team();
         Fx.breakBlock.at(tile.drawx(), tile.drawy(), block.size);
         Events.fire(new BlockBuildEndEvent(tile, builder, team, true, null));
+        state.amendments.lastBuilding.put(tile.pos(), block.name);
         tile.remove();
         if(shouldPlay()) Sounds.breaks.at(tile, calcPitch(false));
     }
@@ -79,7 +80,7 @@ public class ConstructBlock extends Block{
             }
 
             if(builder != null && builder.getControllerName() != null){
-                tile.build.lastAccessed = builder.getControllerName();
+                state.amendments.lastAccessed.put(tile.build.pos(), builder.getControllerName());
             }
         }
 

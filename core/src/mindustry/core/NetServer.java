@@ -504,6 +504,8 @@ public class NetServer implements ApplicationListener{
         player.con.sendStream(data);
 
         debug("Packed @ bytes of world data.", stream.size());
+
+        Call.setAmendments(state.amendments);
     }
 
     public void addPacketHandler(String type, Cons2<Player, String> handler){
