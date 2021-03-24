@@ -301,6 +301,13 @@ public class UnitType extends UnlockableContent{
             }
         }
 
+        //set up default recoil time
+        for(Weapon weapon : weapons){
+            if(weapon.restitutionTime < 0f){
+                weapon.restitutionTime = weapon.reload;
+            }
+        }
+
         if(weapons.isEmpty()){
             range = maxRange = miningRange;
         }
@@ -601,7 +608,7 @@ public class UnitType extends UnlockableContent{
 
             float rotation = unit.rotation - 90;
             float weaponRotation  = rotation + (weapon.rotate ? mount.rotation : 0);
-            float recoil = -((mount.reload) / weapon.reload * weapon.recoil);
+            float recoil = -(mount.recoil * weapon.recoil);
             float wx = unit.x + Angles.trnsx(rotation, weapon.x, weapon.y) + Angles.trnsx(weaponRotation, 0, recoil),
                 wy = unit.y + Angles.trnsy(rotation, weapon.x, weapon.y) + Angles.trnsy(weaponRotation, 0, recoil);
 
