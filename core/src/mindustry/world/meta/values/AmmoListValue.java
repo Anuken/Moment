@@ -19,9 +19,17 @@ import static mindustry.Vars.*;
 
 public class AmmoListValue<T extends UnlockableContent> implements StatValue{
     private final ObjectMap<T, BulletType> map;
+    
+    private final float indent;
 
     public AmmoListValue(ObjectMap<T, BulletType> map){
         this.map = map;
+        this.indent = 0f;
+    }
+
+    public AmmoListValue(ObjectMap<T, BulletType> map, float indent){
+        this.map = map;
+        this.indent = indent;
     }
 
     @Override
@@ -33,9 +41,10 @@ public class AmmoListValue<T extends UnlockableContent> implements StatValue{
             boolean unit = t instanceof UnitType;
 
             BulletType type = map.get(t);
+            boolean isFrag = indent > 0f;
 
             //no point in displaying unit icon twice
-            if(!unit & !(t instanceof PowerTurret)){
+            if(!unit && !(t instanceof PowerTurret) && !isFrag){
                 table.image(icon(t)).size(3 * 8).padRight(4).right().top();
                 table.add(t.localizedName).padRight(10).left().top();
             }
@@ -59,11 +68,11 @@ public class AmmoListValue<T extends UnlockableContent> implements StatValue{
                     sep(bt, Core.bundle.format("bullet.splashdamage", (int)type.splashDamage, Strings.fixed(type.splashDamageRadius / tilesize, 1)));
                 }
 
-                if(!unit && !Mathf.equal(type.ammoMultiplier, 1f) && !(type instanceof LiquidBulletType)){
+                if(!unit && !Mathf.equal(type.ammoMultiplier, 1f) && !(type instanceof LiquidBulletType) && !isFrag){
                     sep(bt, Core.bundle.format("bullet.multiplier", (int)type.ammoMultiplier));
                 }
 
-                if(!Mathf.equal(type.reloadMultiplier, 1f)){
+                if(!Mathf.equal(type.reloadMultiplier, 1f) && !isFrag){
                     sep(bt, Core.bundle.format("bullet.reload", Strings.autoFixed(type.reloadMultiplier, 2)));
                 }
 
@@ -96,9 +105,17 @@ public class AmmoListValue<T extends UnlockableContent> implements StatValue{
                 }
 
                 if(type.fragBullet != null){
-                    sep(bt, "@bullet.frag");
+                    sep(bt, Core.bundle.format("bullet.fragbullets", type.fragBullets));
+                    sep(bt, "@bullet.frag.stats");
+                    bt.row();
+
+                    ObjectMap<T, BulletType> fragMap = new ObjectMap<>();
+                    fragMap = OrderedMap.of(t, type.fragBullet);
+                    StatValue fragStatValue = new AmmoListValue<>(fragMap, indent + 1f);
+
+                    fragStatValue.display(bt);
                 }
-            }).padTop(unit ? 0 : -9).left().get().background(unit ? null : Tex.underline);
+            }).padTop(unit || isFrag ? 0 : -9).padLeft(indent * 8).left().get().background(unit || isFrag ? null : Tex.underline);
 
             table.row();
         }
