@@ -58,6 +58,10 @@ abstract class BulletComp implements Timedc, Damagec, Hitboxc, Teamc, Posc, Draw
         collided.clear();
     }
 
+    public boolean hasCollided(int id){
+        return collided.contains(id);
+    }
+
     @Override
     public float damageMultiplier(){
         if(owner instanceof Unit) return ((Unit)owner).damageMultiplier() * state.rules.unitDamageMultiplier;
@@ -82,7 +86,7 @@ abstract class BulletComp implements Timedc, Damagec, Hitboxc, Teamc, Posc, Draw
     public boolean collides(Hitboxc other){
         return type.collides && (other instanceof Teamc && ((Teamc)other).team() != team)
             && !(other instanceof Flyingc && !((Flyingc)other).checkTarget(type.collidesAir, type.collidesGround))
-            && !(type.pierce && collided.contains(other.id())); //prevent multiple collisions
+            && !(type.pierce && hasCollided(other.id())); //prevent multiple collisions
     }
 
     @MethodPriority(100)
@@ -119,7 +123,7 @@ abstract class BulletComp implements Timedc, Damagec, Hitboxc, Teamc, Posc, Draw
                 Building tile = world.build(x, y);
                 if(tile == null || !isAdded()) return false;
 
-                if(tile.collide(self()) && type.testCollision(self(), tile) && !tile.dead() && (type.collidesTeam || tile.team != team) && !(type.pierceBuilding && collided.contains(tile.id))){
+                if(tile.collide(self()) && type.testCollision(self(), tile) && !tile.dead() && (type.collidesTeam || tile.team != team) && !(type.pierceBuilding && hasCollided(tile.id))){
                     boolean remove = false;
 
                     float health = tile.health;
