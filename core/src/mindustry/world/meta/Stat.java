@@ -59,6 +59,7 @@ public enum Stat{
     tiles(StatCat.crafting),
     input(StatCat.crafting),
     output(StatCat.crafting),
+    fuel(StatCat.crafting),
     productionTime(StatCat.crafting),
     drillTier(StatCat.crafting),
     drillSpeed(StatCat.crafting),
