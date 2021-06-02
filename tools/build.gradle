@@ -18,7 +18,7 @@ def doAntialias = !project.hasProperty("disableAntialias")
 def colorMap = new IntMap<List<Color>>(), colorIndexMap = new IntIntMap()
 //on my machine, I have a native Nim AA implementation that is ~10x faster
 //it's not compiled for other platforms so they don't get it
-def useFastAA = System.getProperty("user.name") == "anuke"
+def useFastAA = project.hasProperty("fastAA") || System.getProperty("user.name") == "anuke"
 
 def transformColors = { List<List<String>> list ->
     list.each{ colors ->
@@ -231,7 +231,7 @@ task pack(dependsOn: [classes, configurations.runtimeClasspath]){
             e.printStackTrace()
         }
 
-        println "Time taken for AA: ${(System.currentTimeMillis() - ms) / 1000f}"
+        println "Seconds taken for AA: ${(System.currentTimeMillis() - ms) / 1000f}"
 
         println("\n\nPacking normal 4096 sprites...\n\n")
 
