@@ -176,6 +176,8 @@ public class CustomRulesDialog extends BaseDialog{
         check("@rules.explosions", b -> rules.damageExplosions = b, () -> rules.damageExplosions);
         check("@rules.fire", b -> rules.fire = b, () -> rules.fire);
         check("@rules.lighting", b -> rules.lighting = b, () -> rules.lighting);
+        check("@rules.daynightcycle", b -> rules.dayNightCycle = b, () -> rules.dayNightCycle);
+        number("@rules.daynightcyclespeed", f -> rules.dayNightCycleSpeed = f, () -> rules.dayNightCycleSpeed, 1f, 20f);
         check("@rules.enemyLights", b -> rules.enemyLights = b, () -> rules.enemyLights);
 
         main.button(b -> {

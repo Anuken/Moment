@@ -2,9 +2,11 @@ package mindustry.core;
 
 import arc.*;
 import arc.math.*;
+import arc.graphics.*;
 import arc.util.*;
 import mindustry.annotations.Annotations.*;
 import mindustry.core.GameState.*;
+import mindustry.core.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.game.*;
@@ -14,6 +16,7 @@ import mindustry.maps.*;
 import mindustry.type.*;
 import mindustry.type.Weather.*;
 import mindustry.world.*;
+import mindustry.graphics.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
 import java.util.*;
@@ -276,6 +279,30 @@ public class Logic implements ApplicationListener{
         }
     }
 
+    private void dayNightCycleUpdate(){
+        float realSpeed = state.rules.dayNightCycleSpeed / 120000f;
+        float darkLight = 0.75f;
+        if(state.rules.dayNightCycle){
+            if(state.rules.ambientLight.a >= 1){
+                state.rules.ambientLight.a = 0;
+            }
+            if(state.rules.ambientLight.a + realSpeed > 1 || state.rules.ambientLight.a > darkLight){
+                state.rules.ambientLight.a = darkLight;
+                state.rules.dayNightCycleDark = false;
+            }
+            if(state.rules.ambientLight.a - realSpeed < 0){
+                state.rules.ambientLight.a = 0;
+                state.rules.dayNightCycleDark = true;
+            }
+
+            if(state.rules.dayNightCycleDark){
+                state.rules.ambientLight.a = state.rules.ambientLight.a + realSpeed;
+            }else{
+                state.rules.ambientLight.a = state.rules.ambientLight.a - realSpeed;
+            }
+        }
+    }
+
     @Remote(called = Loc.server)
     public static void sectorCapture(){
         //the sector has been conquered - waves get disabled
@@ -392,15 +419,28 @@ public class Logic implements ApplicationListener{
                 }
                 Time.update();
 
-                //weather is serverside
+                //weather, day night cycle is serverside
                 if(!net.client() && !state.isEditor()){
                     updateWeather();
+
+                    if(state.hasSector()){
+                        state.rules.dayNightCycle = false;
+                    }
+                    if(state.rules.dayNightCycle && state.rules.lighting == false){
+                        state.rules.lighting = true;
+                        state.rules.ambientLight = new Color(0.01f, 0.01f, 0.04f, 0.1f);
+                    };
+                    dayNightCycleUpdate();
 
                     for(TeamData data : state.teams.getActive()){
                         if(data.hasAI()){
                             data.ai.update();
                         }
                     }
+                }
+
+                if(net.server() && state.rules.dayNightCycle){
+                    Call.setRules(state.rules);
                 }
 
                 if(state.rules.waves && state.rules.waveTimer && !state.gameOver){
