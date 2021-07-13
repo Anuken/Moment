@@ -154,9 +154,9 @@ public class UI implements ApplicationListener, Loadable{
 
     @Override
     public void init(){
-        billions = Core.bundle.get("unit.billions");
-        millions = Core.bundle.get("unit.millions");
-        thousands = Core.bundle.get("unit.thousands");
+        billions = Core.bundle.getOrNull("unit.billions");
+        millions = Core.bundle.getOrNull("unit.millions");
+        thousands = Core.bundle.getOrNull("unit.thousands");
 
         menuGroup = new WidgetGroup();
         hudGroup = new WidgetGroup();
@@ -579,11 +579,48 @@ public class UI implements ApplicationListener, Loadable{
     }
 
     public static String formatAmount(long number){
+        return formatAmount(number, 1);
+    }
+
+    public static String formatAmount(long number, int decimalPlaces){
+        return formatAmount(number, decimalPlaces, false);
+    }
+
+    public static String formatAmount(long number, boolean si){
+        return formatAmount(number, si ? 0 : 1, si);
+    }
+
+    public static String formatAmount(long number, int decimalPlaces, boolean si){
         //prevent overflow
         if(number == Long.MIN_VALUE) number ++;
 
         long mag = Math.abs(number);
         String sign = number < 0 ? "-" : "";
+
+        ObjectMap<String, String> map = Core.bundle.getProperties();
+        float unit = 0;
+        String unitString = null;
+        boolean isNumericUnitsAvailable = false;
+        // 20 == length of string representation of UINT64_MAX
+        for(int index = 20; index > 0; index--){
+            String key = "unit.1e" + index + (si ? ".si" : "");
+            float criteria = (float)Math.pow(10, index);
+            if(map.containsKey(key)){
+                isNumericUnitsAvailable = true;
+                if(mag >= criteria){
+                    unit = criteria;
+                    unitString = map.getNull(key);
+                    break;
+                }
+            }
+        }
+        if(isNumericUnitsAvailable){
+            if(unitString != null){
+                return sign + Strings.fixed(mag / unit, decimalPlaces) + "[gray]" + unitString + "[]";
+            }
+            return number + "";
+        }
+
         if(mag >= 1_000_000_000){
             return sign + Strings.fixed(mag / 1_000_000_000f, 1) + "[gray]" + billions+ "[]";
         }else if(mag >= 1_000_000){
