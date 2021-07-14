@@ -5,6 +5,7 @@ import arc.func.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
@@ -58,6 +59,7 @@ public class CoreBlock extends StorageBlock{
         envEnabled = Env.any;
         drawDisabled = false;
         replaceable = false;
+        configurable = true;
     }
 
     @Remote(called = Loc.server)
@@ -455,6 +457,23 @@ public class CoreBlock extends StorageBlock{
                 incinerateEffect(this, source);
                 noEffect = false;
             }
+        }
+
+        @Override
+        public void buildConfiguration(Table table){
+            if(!state.isCampaign() || net.client()){
+                deselect();
+                return;
+            }
+
+            table.button(Icon.downOpen, Styles.clearTransi, () -> {
+                ui.planet.showSelect(state.rules.sector, other -> {
+                    if(state.isCampaign()){
+                        other.info.destination = state.rules.sector;
+                    }
+                });
+                deselect();
+            }).size(40f);
         }
     }
 }
