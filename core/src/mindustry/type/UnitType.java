@@ -56,7 +56,7 @@ public class UnitType extends UnlockableContent{
     public float health = 200f, range = -1, miningRange = 70f, armor = 0f, maxRange = -1f;
     public float crashDamageMultiplier = 1f;
     public boolean targetAir = true, targetGround = true;
-    public boolean faceTarget = true, rotateShooting = true, isCounted = true, lowAltitude = false, circleTarget = false;
+    public boolean faceTarget = true, rotateShooting = true, isCounted = true, displayCapBar = true, lowAltitude = false, circleTarget = false;
     public boolean canBoost = false;
     public boolean destructibleWreck = true;
     public float groundLayer = Layer.groundUnit;
@@ -212,6 +212,21 @@ public class UnitType extends UnlockableContent{
                         count[0] = payload.payloadUsed();
                     }
                 }).growX().left().height(0f).pad(0f);
+                if(displayCapBar) bars.row();
+            }
+
+            if(displayCapBar){
+                bars.add(
+                    new Bar(
+                        () -> Core.bundle.format("bar.unitcap",
+                                Fonts.getUnicodeStr(name),
+                                unit.count(),
+                                unit.cap()
+                            ),
+                        () -> Pal.power,
+                        unit::countf
+                    )
+                );
             }
         }).growX();
 
