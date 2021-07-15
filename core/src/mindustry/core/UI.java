@@ -164,9 +164,9 @@ public class UI implements ApplicationListener, Loadable{
             }
         }
         if(numericUnits.isEmpty()){
-            numericUnits.put(3, Core.bundle.getOrNull("unit.billions"));
-            numericUnits.put(6, Core.bundle.getOrNull("unit.millions"));
-            numericUnits.put(9, Core.bundle.getOrNull("unit.thousands"));
+            numericUnits.put(3, Core.bundle.get("unit.billions"));
+            numericUnits.put(6, Core.bundle.get("unit.millions"));
+            numericUnits.put(9, Core.bundle.get("unit.thousands"));
         }
         this.numericUnits = numericUnits;
 
