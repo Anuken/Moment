@@ -622,7 +622,7 @@ public class UI implements ApplicationListener, Loadable{
 
         int unit = 0;
         String unitString = null;
-        int digits = (int)Math.floor(Math.log10(number)) + 1;
+        int digits = (int)Math.log10(number) + 1;
         while(digits > 0){
             unit = digits - 1;
             if(si){
