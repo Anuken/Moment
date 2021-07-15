@@ -33,7 +33,8 @@ import static arc.scene.actions.Actions.*;
 import static mindustry.Vars.*;
 
 public class UI implements ApplicationListener, Loadable{
-    public static String billions, millions, thousands;
+    private static IntMap<String> numericUnits;
+    private static IntMap<String> numericSIUnits;
 
     public static PixmapPacker packer;
 
@@ -154,9 +155,31 @@ public class UI implements ApplicationListener, Loadable{
 
     @Override
     public void init(){
-        billions = Core.bundle.get("unit.billions");
-        millions = Core.bundle.get("unit.millions");
-        thousands = Core.bundle.get("unit.thousands");
+        ObjectMap<String, String> singleBundleProperties = Core.bundle.getProperties();
+        IntMap<String> numericUnits = new IntMap<String>();
+        for(int index = 0; index <= 20; index++){
+            String key = "unit.1e" + index;
+            if(singleBundleProperties.containsKey(key)){
+                numericUnits.put(index, singleBundleProperties.getNull(key));
+            }
+        }
+        if(numericUnits.isEmpty()){
+            numericUnits.put(3, Core.bundle.get("unit.billions"));
+            numericUnits.put(6, Core.bundle.get("unit.millions"));
+            numericUnits.put(9, Core.bundle.get("unit.thousands"));
+        }
+        this.numericUnits = numericUnits;
+
+        IntMap<String> numericSIUnits = new IntMap<String>();
+        numericSIUnits.put(3, Core.bundle.get("unit.1e3.si"));
+        numericSIUnits.put(6, Core.bundle.get("unit.1e6.si"));
+        numericSIUnits.put(9, Core.bundle.get("unit.1e9.si"));
+        numericSIUnits.put(12, Core.bundle.get("unit.1e12.si"));
+        numericSIUnits.put(15, Core.bundle.get("unit.1e15.si"));
+        numericSIUnits.put(18, Core.bundle.get("unit.1e18.si"));
+        numericSIUnits.put(21, Core.bundle.get("unit.1e21.si"));
+        numericSIUnits.put(24, Core.bundle.get("unit.1e24.si"));
+        this.numericSIUnits = numericSIUnits;
 
         menuGroup = new WidgetGroup();
         hudGroup = new WidgetGroup();
@@ -579,22 +602,46 @@ public class UI implements ApplicationListener, Loadable{
     }
 
     public static String formatAmount(long number){
+        return formatAmount(number, 1);
+    }
+
+    public static String formatAmount(long number, int decimalPlaces){
+        return formatAmount(number, decimalPlaces, false);
+    }
+
+    public static String formatAmount(long number, boolean si){
+        return formatAmount(number, si ? 0 : 1, si);
+    }
+
+    public static String formatAmount(long number, int decimalPlaces, boolean si){
         //prevent overflow
         if(number == Long.MIN_VALUE) number ++;
 
         long mag = Math.abs(number);
         String sign = number < 0 ? "-" : "";
-        if(mag >= 1_000_000_000){
-            return sign + Strings.fixed(mag / 1_000_000_000f, 1) + "[gray]" + billions+ "[]";
-        }else if(mag >= 1_000_000){
-            return sign + Strings.fixed(mag / 1_000_000f, 1) + "[gray]" +millions + "[]";
-        }else if(mag >= 10_000){
-            return number / 1000 + "[gray]" + thousands + "[]";
-        }else if(mag >= 1000){
-            return sign + Strings.fixed(mag / 1000f, 1) + "[gray]" + thousands + "[]";
-        }else{
-            return number + "";
+
+        int unit = 0;
+        String unitString = null;
+        int digits = (int)Math.log10(number) + 1;
+        while(digits > 0){
+            unit = digits - 1;
+            if(si){
+                if(numericSIUnits.containsKey(unit)){
+                    unitString = numericSIUnits.get(unit);
+                    break;
+                }
+            }else{
+                if(numericUnits.containsKey(unit)){
+                    unitString = numericUnits.get(unit);
+                    break;
+                }
+            }
+            digits--;
         }
+        if(unitString != null){
+            return sign + Strings.fixed(mag / (float)Math.pow(10, unit), decimalPlaces) + "[gray]" + unitString + "[]";
+        }
+        return number + "";
     }
 
     public static int roundAmount(int number){
