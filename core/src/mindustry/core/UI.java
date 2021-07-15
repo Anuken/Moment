@@ -639,7 +639,6 @@ public class UI implements ApplicationListener, Loadable{
             digits--;
         }
         if(unitString != null){
-            Log.info(Integer.toString(unit));
             return sign + Strings.fixed(mag / (float)Math.pow(10, unit), decimalPlaces) + "[gray]" + unitString + "[]";
         }
         return number + "";
